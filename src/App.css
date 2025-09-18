@@ -1,0 +1,14 @@
+/* Remove conflicting styles and let Tailwind handle the layout */
+/* Only keep essential styles that don't conflict with our design */
+
+/* Custom animations if needed */
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Remove all other conflicting styles */

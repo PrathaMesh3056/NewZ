@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/Newz_logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Latest breaking news, headlines, and AI-powered summaries across business, tech, sports, and more." />
+    <meta name="robots" content="index, follow" />
+    <!-- Removed canonical href="/" to avoid Vite build trying to read project root as a file (EISDIR). Use a full absolute URL in production. -->
+    <!-- <link rel="canonical" href="https://your-domain.example/" /> -->
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Newz — Today's Headlines with AI Summaries" />
+    <meta property="og:description" content="Stay updated with the latest headlines and concise AI summaries." />
+    <meta property="og:url" content="/" />
+    <meta property="og:image" content="/Newz_logo.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Newz — Today's Headlines with AI Summaries" />
+    <meta name="twitter:description" content="Stay updated with the latest headlines and concise AI summaries." />
+    <meta name="twitter:image" content="/Newz_logo.png" />
+
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light" />
+    <!-- Force light background & color-scheme as a safety net -->
+    <style>
+      html { color-scheme: light; }
+      html, body { background: #f9fafb !important; }
+      body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    </style>
+    <script>
+      (function() {
+        // Temporarily force LIGHT theme globally
+        try {
+          localStorage.setItem('theme-dark', 'false');
+          var root = document.documentElement;
+          var body = document.body || document.getElementsByTagName('body')[0];
+          var meta = document.querySelector('meta[name="theme-color"]');
+          root.classList.remove('dark');
+          if (body) body.classList.remove('dark');
+          if (meta) meta.setAttribute('content', '#ffffff');
+          if (body) body.style.backgroundColor = '#f9fafb';
+        } catch (e) {}
+      })();
+    </script>
+    <script>
+      // Sanity cleanup: remove any stray 'dark' classes from the entire DOM
+      document.addEventListener('DOMContentLoaded', function() {
+        try {
+          document.querySelectorAll('.dark').forEach(function(el){ el.classList.remove('dark'); });
+          // MutationObserver to prevent any element from acquiring 'dark' class
+          const observer = new MutationObserver((mutations) => {
+            for (const m of mutations) {
+              if (m.type === 'attributes' && m.attributeName === 'class') {
+                if (m.target.classList && m.target.classList.contains('dark')) {
+                  m.target.classList.remove('dark');
+                }
+              } else if (m.type === 'childList') {
+                m.addedNodes.forEach((node) => {
+                  if (node.nodeType === 1) {
+                    if (node.classList && node.classList.contains('dark')) node.classList.remove('dark');
+                    node.querySelectorAll && node.querySelectorAll('.dark').forEach((el) => el.classList.remove('dark'));
+                  }
+                });
+              }
+            }
+          });
+          observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'], childList: true, subtree: true });
+        } catch (e) {}
+      });
+    </script>
+    <title>Newz — Today's Headlines with AI Summaries</title>
+  </head>
+  <body class="antialiased text-gray-800">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
