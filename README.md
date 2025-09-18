@@ -1,6 +1,5 @@
 # NewZ - AI News Summarizer
 
-![Project Banner or GIF]
 
 ## 📖 Overview
 
@@ -15,8 +14,8 @@ NewZ is a web application that uses AI and Retrieval-Augmented Generation (RAG) 
 ## 🛠️ Technology Stack
 
 -   **Frontend:** React, Tailwind CSS
--   **Backend:** Python (Flask/FastAPI), LangChain
--   **Database:** [Your Database, e.g., PostgreSQL, ChromaDB]
+-   **Backend:** Python (FastAPI), LangChain
+-   **VectorDatabase:** Milvus
 -   **Deployment:** Docker
 
 ## 🚀 Getting Started
