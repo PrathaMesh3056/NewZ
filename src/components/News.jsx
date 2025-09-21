@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import NewsItem from './NewsItem';
+import NewsItem from './Newsitem';
 import Spinner from './Spinner';
 import SkeletonCard from './SkeletonCard';
 import PropTypes from 'prop-types';
@@ -76,8 +76,8 @@ export class News extends Component {
 
     const cacheKey = `${articlesToTranslate.map(a => a.url).join('')}-${targetLang}`;
     if (translationCache.has(cacheKey)) {
-        this.setState({ translatedArticles: translationCache.get(cacheKey), loading: false });
-        return;
+      this.setState({ translatedArticles: translationCache.get(cacheKey), loading: false });
+      return;
     }
 
     try {
@@ -113,25 +113,25 @@ export class News extends Component {
     const cacheKey = `${category}-${country}`;
 
     if (!isLoadMore && this.state.page === 1 && newsCache.has(cacheKey)) {
-        const cachedData = newsCache.get(cacheKey);
-        this.setState({
-            articles: cachedData.articles,
-            totalResults: cachedData.totalResults,
-            hasMore: cachedData.articles.length < cachedData.totalResults,
-            loading: false,
-        });
-        this.props.setProgress?.(100);
+      const cachedData = newsCache.get(cacheKey);
+      this.setState({
+        articles: cachedData.articles,
+        totalResults: cachedData.totalResults,
+        hasMore: cachedData.articles.length < cachedData.totalResults,
+        loading: false,
+      });
+      this.props.setProgress?.(100);
 
-        if (this.state.language !== 'en') {
-            this.translateArticles(cachedData.articles, this.state.language);
-        }
-        return;
+      if (this.state.language !== 'en') {
+        this.translateArticles(cachedData.articles, this.state.language);
+      }
+      return;
     }
 
     if (!isLoadMore) {
-        this.controller.abort();
-        this.controller = new AbortController();
-        this.props.setProgress?.(10);
+      this.controller.abort();
+      this.controller = new AbortController();
+      this.props.setProgress?.(10);
     }
 
     const { page, query, source } = this.state;
@@ -164,7 +164,7 @@ export class News extends Component {
         const newArticles = page === 1 ? data.articles : [...prevState.articles, ...data.articles];
 
         if (page === 1) {
-            newsCache.set(cacheKey, { articles: newArticles, totalResults: data.totalResults });
+          newsCache.set(cacheKey, { articles: newArticles, totalResults: data.totalResults });
         }
 
         if (this.state.language !== 'en') {
@@ -206,14 +206,14 @@ export class News extends Component {
     this.setState({ query: value });
     if (this.queryDebounce) clearTimeout(this.queryDebounce);
     this.queryDebounce = setTimeout(() => {
-      try { localStorage.setItem('newz.query', value); } catch {}
+      try { localStorage.setItem('newz.query', value); } catch { }
     }, 300);
   }
 
   handleSourceChange = (e) => {
     const value = e.target.value;
     this.setState({ source: value });
-    try { localStorage.setItem('newz.source', value); } catch {}
+    try { localStorage.setItem('newz.source', value); } catch { }
   }
 
   capitalizeFirstLetter = (string) => {
@@ -309,15 +309,15 @@ export class News extends Component {
               <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
                 {this.capitalizeFirstLetter(this.props.category)} News
               </h1>
-              
+
               <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed mb-6">
-              {t('information')}
-              {t('informationnext')}
+                {t('information')}
+                {t('informationnext')}
               </p>
               <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                 <div className="relative w-full sm:w-80">
                   <span className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z"/></svg>
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z" /></svg>
                   </span>
                   <input
                     type="text"
@@ -334,13 +334,13 @@ export class News extends Component {
                       aria-label="Clear search"
                       className="absolute inset-y-0 right-0 pr-2 text-gray-400 hover:text-gray-600"
                     >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                   )}
                 </div>
                 <div className="relative w-full sm:w-64">
                   <span className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h18M3 12h18M3 19h18"/></svg>
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h18M3 12h18M3 19h18" /></svg>
                   </span>
                   <select
                     value={this.state.source}
@@ -369,7 +369,7 @@ export class News extends Component {
                     </optgroup>
                   </select>
                   <span className="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
                   </span>
                 </div>
               </div>
