@@ -13,6 +13,7 @@ import Testing from './components/Testing';
 import { Toaster } from './components/Toaster';
 import ErrorBoundary from './components/ErrorBoundary';
 import AiSearch from './components/AiSearch';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export default class App extends Component {
  
