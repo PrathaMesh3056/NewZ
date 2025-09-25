@@ -19,7 +19,7 @@ export default defineConfig({
     port: 3001,
     watch: {
       ignored: [
-        '**/Backend/volumes/**',   // 🚫 Ignore docker volumes
+        '**/Backend/volumes/**', // 🚫 Ignore docker volumes
       ],
     },
     proxy: {
@@ -47,5 +47,9 @@ export default defineConfig({
         },
       },
     },
+  },
+  // 👇 Add this new preview block
+  preview: {
+    allowedHosts: [process.env.RENDER_EXTERNAL_HOSTNAME],
   },
 });
