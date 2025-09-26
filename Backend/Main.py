@@ -290,16 +290,16 @@ def debug_count():
         return {"error": str(e)}
 
 # --- React Frontend Serving ---
-app.mount("/assets", StaticFiles(directory=os.path.join(REACT_BUILD_DIR, "assets")), name="assets")
+# app.mount("/assets", StaticFiles(directory=os.path.join(REACT_BUILD_DIR, "assets")), name="assets")
 
-@app.get("/{full_path:path}")
-def serve_react_routes(full_path: str):
-    if full_path.startswith("api/"):
-        raise HTTPException(status_code=404, detail="API route not found")
-    file_path = os.path.join(REACT_BUILD_DIR, full_path)
-    if os.path.isfile(file_path):
-        return FileResponse(file_path)
-    return FileResponse(os.path.join(REACT_BUILD_DIR, "index.html"))
+# @app.get("/{full_path:path}")
+# def serve_react_routes(full_path: str):
+#     if full_path.startswith("api/"):
+#         raise HTTPException(status_code=404, detail="API route not found")
+#     file_path = os.path.join(REACT_BUILD_DIR, full_path)
+#     if os.path.isfile(file_path):
+#         return FileResponse(file_path)
+#     return FileResponse(os.path.join(REACT_BUILD_DIR, "index.html"))
 
 if __name__ == "__main__":
     import uvicorn
