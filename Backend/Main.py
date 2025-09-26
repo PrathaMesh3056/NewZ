@@ -120,9 +120,8 @@ def fetch_and_index_news(background_tasks: BackgroundTasks, category: str = "gen
 async def startup_event():
     logger.info("=== FastAPI App Starting ===")
     try:
-        # I HAVE COMMENTED OUT THE LINE BELOW TO ALLOW THE SERVER TO START
-        # create_milvus_collection_if_not_exists()
-        pass # This line does nothing, it's just a placeholder
+        # Re-enabling the Milvus connection
+        create_milvus_collection_if_not_exists()
     except Exception as e:
         logger.error(f"Startup init failed: {e}")
     logger.info("Application startup complete.")

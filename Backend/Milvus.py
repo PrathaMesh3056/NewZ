@@ -6,8 +6,11 @@ from pymilvus import connections, utility, Collection, FieldSchema, CollectionSc
 
 logger = logging.getLogger("uvicorn")
 
-MILVUS_HOST = os.getenv("MILVUS_HOST", "localhost")
-MILVUS_PORT = os.getenv("MILVUS_PORT", "19530")
+# --- MODIFIED: Read Zilliz Cloud credentials from environment variables ---
+MILVUS_URI = os.getenv("MILVUS_URI")
+MILVUS_TOKEN = os.getenv("MILVUS_TOKEN")
+# --- End of Modification ---
+
 COLLECTION_NAME = "news_articles"
 embedding_dimension = 384
 
@@ -20,12 +23,19 @@ def get_embedding_model():
     logger.info("Embedding model loaded successfully.")
     return model
 
-
+# --- MODIFIED: This function now connects to Zilliz Cloud ---
 def get_milvus_connection():
     """Establishes a connection to Milvus if one doesn't exist."""
     if not connections.has_connection("default"):
-        logger.info(f"Connecting to Milvus at {MILVUS_HOST}:{MILVUS_PORT}...")
-        connections.connect("default", host=MILVUS_HOST, port=MILVUS_PORT)
+        logger.info(f"Connecting to Milvus at {MILVUS_URI}...")
+        if not MILVUS_URI or not MILVUS_TOKEN:
+            logger.error("FATAL: MILVUS_URI and MILVUS_TOKEN environment variables must be set.")
+            raise ValueError("Milvus credentials are not configured on the server.")
+        
+        connections.connect("default", uri=MILVUS_URI, token=MILVUS_TOKEN)
+        logger.info("Successfully connected to Milvus.")
+# --- End of Modification ---
+
 
 def create_milvus_collection_if_not_exists():
     """Checks if the collection exists and creates it if it doesn't."""
@@ -35,8 +45,8 @@ def create_milvus_collection_if_not_exists():
 
         fields = [
             FieldSchema(name="title", dtype=DataType.VARCHAR, max_length=512),
-            FieldSchema(name="article_text", dtype=DataType.VARCHAR, max_length=65535), # Increased max length for full articles
-            FieldSchema(name="source_url", dtype=DataType.VARCHAR, max_length=1024, is_primary=True), # Made URL primary key to avoid duplicates
+            FieldSchema(name="article_text", dtype=DataType.VARCHAR, max_length=65535),
+            FieldSchema(name="source_url", dtype=DataType.VARCHAR, max_length=1024, is_primary=True),
             FieldSchema(name="author", dtype=DataType.VARCHAR, max_length=256),
             FieldSchema(name="published_at", dtype=DataType.VARCHAR, max_length=64),
             FieldSchema(name="source_name", dtype=DataType.VARCHAR, max_length=256),
@@ -79,8 +89,7 @@ def insert_articles(articles: list[dict]):
 
     texts = [item["article_text"] for item in articles]
     embeddings = generate_embeddings(texts)
-
-    # <--- MODIFIED: Ensure all fields from the schema are included --->
+ 
     entities = [
         {
             "title": item.get("title", "No Title"),
@@ -95,18 +104,17 @@ def insert_articles(articles: list[dict]):
     ]
 
     try:
-        # Using upsert instead of insert to avoid duplicate errors if URL already exists
         collection.upsert(entities)
         collection.flush()
         logger.info(f"Upserted {len(articles)} articles into Milvus.")
     except Exception as e:
         logger.error(f"Failed to upsert articles into Milvus: {e}")
 
-# <--- MODIFIED: This entire function is updated to support date filtering --->
+
 def search_similar_articles(query_text: str, top_k: int = 3, expr: str = None) -> list:
     """Searches Milvus for articles similar to the query text with an optional filter."""
     collection = Collection(name=COLLECTION_NAME)
-    collection.load() # Ensure collection is loaded before search
+    collection.load()
     query_embedding = generate_embeddings([query_text])[0]
 
     search_params = {"metric_type": "L2", "params": {"nprobe": 10}}
@@ -116,7 +124,7 @@ def search_similar_articles(query_text: str, top_k: int = 3, expr: str = None) -
         anns_field="embedding",
         param=search_params,
         limit=top_k,
-        expr=expr,  # Pass the filter expression to the search
+        expr=expr,
         output_fields=["title", "article_text", "source_url", "published_at"]
     )
 
@@ -126,7 +134,7 @@ def search_similar_articles(query_text: str, top_k: int = 3, expr: str = None) -
             "title": hit.entity.get('title'),
             "content": hit.entity.get('article_text'),
             "url": hit.entity.get('source_url'),
-            "published_at": hit.entity.get('published_at'), # Include published_at in output
+            "published_at": hit.entity.get('published_at'),
             "similarity_score": hit.distance
         })
     return retrieved_articles
