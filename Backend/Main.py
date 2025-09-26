@@ -301,6 +301,9 @@ def debug_count():
 #     if os.path.isfile(file_path):
 #         return FileResponse(file_path)
 #     return FileResponse(os.path.join(REACT_BUILD_DIR, "index.html"))
+@app.get("/")
+def health_check():
+    return {"status": "ok", "message": "API is healthy"}
 
 if __name__ == "__main__":
     import uvicorn
