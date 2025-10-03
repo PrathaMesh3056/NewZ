@@ -1,43 +1,26 @@
-# Dockerfile
-
-# --- Stage 1: Build Stage ---
-# Use a full Python image to build our dependencies for better caching
-FROM python:3.11-slim as builder
+# Use a specific slim Python version for reproducibility
+FROM python:3.11-slim
 
 # Set the working directory
 WORKDIR /app
-
-# Create a virtual environment to keep dependencies isolated
-ENV VIRTUAL_ENV=/app/venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-# Copy and install requirements into the virtual environment
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-
-# --- Stage 2: Final Production Stage ---
-# Use a slim, secure image for the final container
-FROM python:3.11-slim
 
 # Create a non-root user for better security
 RUN useradd --create-home appuser
 USER appuser
 WORKDIR /home/appuser/app
 
-# Copy the virtual environment with installed packages from the builder stage
-COPY --from=builder /app/venv ./venv
+# Copy the requirements file first to leverage Docker's build cache
+COPY --chown=appuser:appuser requirements.txt .
 
-# Copy your application code into the container
+# Install dependencies for the user. The --user flag is important.
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Copy the rest of your application code
 COPY --chown=appuser:appuser . .
 
-# Make the virtual environment's Python the default
-ENV PATH="/home/appuser/app/venv/bin:$PATH"
+# Add the user's local bin directory to the PATH.
+# This is where pip --user installs executables like uvicorn.
+ENV PATH="/home/appuser/.local/bin:$PATH"
 
-# This command starts your application.
-# It tells Uvicorn to run the 'app' object from your 'Main.py' file.
-# The host 0.0.0.0 is required to accept connections on Render.
-# Render will automatically set the PORT environment variable, but we'll use 10000 as a default.
+# Command to run the application
 CMD ["uvicorn", "Main:app", "--host", "0.0.0.0", "--port", "10000"]
-#Render trigger
