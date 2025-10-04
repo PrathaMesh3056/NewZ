@@ -88,12 +88,6 @@ export class News extends Component {
       });
       const { translations } = response.data; // Note: axios puts data in a .data object
 
-      if (!response.ok) {
-        throw new Error('Translation service failed');
-      }
-
-      
-
       const newTranslatedArticles = articlesToTranslate.map((article, index) => ({
         ...article,
         title: translations[index * 2] || article.title,
