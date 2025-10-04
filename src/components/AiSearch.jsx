@@ -86,9 +86,11 @@ const AiSearch = () => {
 
     const handleSearch = async (e, searchQuery = query) => {
         if (e) e.preventDefault();
-        if (!searchQuery.trim() || isLoading) return;
+        
+        const trimmedQuery = searchQuery.trim();
+        if (!trimmedQuery || isLoading) return;
 
-        setQuery(searchQuery);
+        setQuery(trimmedQuery);
         setIsLoading(true);
         setResult(null);
         setError(null);
@@ -100,7 +102,7 @@ const AiSearch = () => {
         controllerRef.current = controller;
 
         try {
-            const response = await apiClient.post('/api/rag-search', { query: searchQuery }, {
+            const response = await apiClient.post('/api/rag-search', { query: trimmedQuery }, {
                 signal: controller.signal,
             });
             setResult(response.data);
@@ -151,11 +153,12 @@ const AiSearch = () => {
                     <p className="text-xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
                         Ask questions and receive comprehensive, verified answers sourced from the latest news articles worldwide.
                     </p>
+                    {/* --- THIS BUTTON IS NOW MORE VISIBLE --- */}
                     <button
                         onClick={handleIndexTrigger}
-                        className="group inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 hover:text-red-600 transition-colors duration-300 mt-4"
+                        className="group inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-red-600 hover:border-red-200 dark:hover:border-red-700 dark:hover:bg-gray-700/50 transition-all duration-300 mt-4 shadow-sm hover:shadow-lg"
                     >
-                        <RefreshCw className="h-4 w-4" />
+                        <RefreshCw className="h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
                         Update article database
                     </button>
                 </div>
