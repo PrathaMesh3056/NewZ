@@ -307,68 +307,63 @@ const AiSummary = () => {
     }
   };
 
-  // <--- MODIFIED: This function now has improved error handling --->
   const generateSummary = async (language) => {
-  if (!description) return;
+    if (!description) return;
 
-  const cacheKey = `${description.substring(0, 100)}-${language}`;
-  if (summaryCache.has(cacheKey)) {
-    const cached = summaryCache.get(cacheKey);
-    setSummary(cached.summary);
-    setInsights(cached.insights);
-    return;
-  }
-
-  setLoading(true);
-  setError(null);
-
-  if (controllerRef.current) controllerRef.current.abort();
-  const controller = new AbortController();
-  controllerRef.current = controller;
-
-  try {
-    const res = await apiClient.post("/api/summary", {
-      text: description,
-      language: language
-    }, {
-      signal: controller.signal
-    });
-
-    // This is the only line you need to get the data from apiClient
-    const data = res.data;
-
-    const summaryData = {
-      event: data?.summary?.trim() || "No summary available",
-      background: data?.background?.trim() || "",
-    };
-    const insightsData = {
-      sentiment: data?.sentiment || "Neutral", readTime: data?.readTime || "30s",
-      context: data?.context || "General news", relevance: data?.relevance || "General interest",
-      bias: data?.bias || "Balanced", next: data?.next || "Watch for follow-ups",
-      wordCount: data?.wordCount || (summaryData.event ? summaryData.event.split(/\s+/).length : 0)
-    };
-
-    summaryCache.set(cacheKey, { summary: summaryData, insights: insightsData });
-    setSummary(summaryData);
-    setInsights(insightsData);
-    setModel(data?.model || null);
-    setConfidence(data?.confidence || null);
-
-  } catch (err) {
-    if (err.name !== 'AbortError') {
-      console.error("Error generating summary:", err);
-      // The apiClient's interceptor already shows a toast message for the user
-      setError(err.message); 
+    const cacheKey = `${description.substring(0, 100)}-${language}`;
+    if (summaryCache.has(cacheKey)) {
+      const cached = summaryCache.get(cacheKey);
+      setSummary(cached.summary);
+      setInsights(cached.insights);
+      return;
     }
-  } finally {
-    if (controllerRef.current === controller) {
-      setLoading(false);
-      controllerRef.current = null;
+
+    setLoading(true);
+    setError(null);
+
+    if (controllerRef.current) controllerRef.current.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+
+    try {
+      const res = await apiClient.post("/api/summary", {
+        text: description,
+        language: language
+      }, {
+        signal: controller.signal
+      });
+
+      const data = res.data;
+
+      const summaryData = {
+        event: data?.summary?.trim() || "No summary available",
+        background: data?.background?.trim() || "",
+      };
+      const insightsData = {
+        sentiment: data?.sentiment || "Neutral", readTime: data?.readTime || "30s",
+        context: data?.context || "General news", relevance: data?.relevance || "General interest",
+        bias: data?.bias || "Balanced", next: data?.next || "Watch for follow-ups",
+        wordCount: data?.wordCount || (summaryData.event ? summaryData.event.split(/\s+/).length : 0)
+      };
+
+      summaryCache.set(cacheKey, { summary: summaryData, insights: insightsData });
+      setSummary(summaryData);
+      setInsights(insightsData);
+      setModel(data?.model || null);
+      setConfidence(data?.confidence || null);
+
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error("Error generating summary:", err);
+        setError(err.message);
+      }
+    } finally {
+      if (controllerRef.current === controller) {
+        setLoading(false);
+        controllerRef.current = null;
+      }
     }
-  }
-};
-    
-  
+  };
 
   const handleLanguageSelect = (languageCode) => {
     setSelectedLanguage(languageCode);
@@ -473,7 +468,7 @@ const AiSummary = () => {
                       AI-generated summary. May contain inaccuracies. Please verify important information.
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center flex-wrap justify-end gap-2 flex-shrink-0">
                     <SummaryActions
                       onPlay={handlePlay}
                       onCopy={handleCopy}
