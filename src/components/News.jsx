@@ -43,7 +43,7 @@ export class News extends Component {
       informationnext: t('informationnext'),
     };
     this.queryDebounce = null;
-    document.title = `${this.capitalizeFirstLetter(this.props.category)} - NewsZ`;
+    document.title = `${this.capitalizeFirstLetter(this.props.category)} - NewZ`;
   }
 
   componentDidMount() {
@@ -129,25 +129,21 @@ export class News extends Component {
       this.props.setProgress?.(10);
     }
 
-    const { page, query, source } = this.state;
-    const envBase = import.meta.env.VITE_API_BASE;
-    const baseUrl = envBase || '/api';
+    const { page } = this.state;
     const languageParam = 'en';
 
     const params = new URLSearchParams({
       country, category, page, pageSize, lang: languageParam,
-      ...(query && { q: query }),
-      ...(source !== 'all' && { sources: source })
     });
 
     this.setState({ loading: true, error: null });
 
     try {
       const res = await apiClient.get('/api/news', {
-        params: params, // Pass the URLSearchParams object directly
+        params: params,
         signal: this.controller.signal
       });
-      const data = res.data; // Get the data directly from res.data
+      const data = res.data;
       if (this.controller.signal.aborted) return;
 
       if (!data.articles || data.articles.length === 0) {
@@ -252,18 +248,8 @@ export class News extends Component {
         </svg>
       ),
     };
-    return icons[category] || icons.general;
+    return icons[this.props.category] || icons.general;
   };
-  getCategoryTheme = (category) => {
-    const map = {
-      general: { bg: 'bg-gray-50', text: 'text-gray-700', ring: 'ring-gray-200' },
-      business: { bg: 'bg-emerald-50', text: 'text-emerald-600', ring: 'ring-emerald-100' },
-      technology: { bg: 'bg-indigo-50', text: 'text-indigo-600', ring: 'ring-indigo-100' },
-      sports: { bg: 'bg-orange-50', text: 'text-orange-600', ring: 'ring-orange-100' },
-      science: { bg: 'bg-teal-50', text: 'text-teal-600', ring: 'ring-teal-100' },
-    };
-    return map[category] || map.general;
-  }
 
   render() {
     const articlesToDisplay = this.state.translatedArticles || this.state.articles;
@@ -284,106 +270,84 @@ export class News extends Component {
     const sources = Array.from(new Set(articlesToDisplay.map(a => a.source?.name).filter(Boolean)));
 
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-gradient-to-b from-white to-gray-50 border-b border-gray-200 mt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center mb-6">
-                {(() => {
-                  const theme = this.getCategoryTheme(this.props.category);
-                  return (
-                    <div className={`w-14 h-14 rounded-full ${theme.bg} ${theme.text} ring-1 ${theme.ring} shadow-sm flex items-center justify-center`}>
-                      <span className="sr-only">Category icon</span>
-                      <span className="[&>svg]:w-7 [&>svg]:h-7">
-                        {this.getCategoryIcon(this.props.category)}
-                      </span>
-                    </div>
-                  );
-                })()}
-              </div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
-                {this.capitalizeFirstLetter(this.props.category)} News
-              </h1>
-
-              <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed mb-6">
-                {t('information')}
-                {t('informationnext')}
-              </p>
-              <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-                <div className="relative w-full sm:w-80">
-                  <span className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z" /></svg>
+      // The main container for the entire page view
+      <div className="min-h-screen bg-gray-50 dark:bg-black">
+        
+        {/* ================================================================== */}
+        {/* THIS IS THE UI SECTION THAT HAS BEEN IMPROVED                   */}
+        {/* ================================================================== */}
+        <div className="relative bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 pt-16">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-r from-gray-50 to-white dark:from-gray-900/50 dark:to-gray-900 opacity-50"></div>
+          </div>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
+            <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center">
+              <div>
+                <div className="inline-flex items-center gap-3 mb-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center text-white shadow-lg">
+                    {this.getCategoryIcon(this.props.category)}
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 text-sm font-medium">
+                    Category
                   </span>
-                  <input
-                    type="text"
-                    value={this.state.query}
-                    onChange={this.handleQueryInput}
-                    placeholder="Search headlines..."
-                    aria-label="Search headlines"
-                    className="w-full h-10 pl-9 pr-8 border border-gray-200 rounded-md bg-white text-gray-800 outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {this.state.query && (
-                    <button
-                      type="button"
-                      onClick={() => this.setState({ query: '' })}
-                      aria-label="Clear search"
-                      className="absolute inset-y-0 right-0 pr-2 text-gray-400 hover:text-gray-600"
+                </div>
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-gray-100 tracking-tight">
+                  {this.capitalizeFirstLetter(this.props.category)} News
+                </h1>
+                <p className="mt-4 text-lg text-gray-500 dark:text-gray-400">
+                  {t('information')}{t('informationnext')}
+                </p>
+                 <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <span>Total: <span className="font-semibold text-gray-700 dark:text-gray-200">{this.state.totalResults.toLocaleString()}</span></span>
+                    <span>Loaded: <span className="font-semibold text-gray-700 dark:text-gray-200">{this.state.articles.length}</span></span>
+                    <span>Sources: <span className="font-semibold text-gray-700 dark:text-gray-200">{sources.length}</span></span>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-8 lg:mt-0">
+                <div className="bg-white/50 dark:bg-gray-800/30 p-6 rounded-2xl shadow-lg backdrop-blur-sm border border-gray-200 dark:border-gray-700 space-y-4">
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 110-15 7.5 7.5 0 010 15z" /></svg>
+                    </span>
+                    <input
+                      type="text"
+                      value={this.state.query}
+                      onChange={this.handleQueryInput}
+                      placeholder="Search headlines..."
+                      aria-label="Search headlines"
+                      className="w-full h-12 pl-12 pr-10 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 outline-none focus:ring-2 focus:ring-red-500"
+                    />
+                  </div>
+                   <div className="relative">
+                     <span className="pointer-events-none absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h18M3 12h18M3 19h18" /></svg>
+                    </span>
+                    <select
+                      value={this.state.source}
+                      onChange={this.handleSourceChange}
+                      aria-label="Filter by source"
+                      className="w-full h-12 pl-12 pr-10 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 outline-none focus:ring-2 focus:ring-red-500 appearance-none"
                     >
-                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                  )}
-                </div>
-                <div className="relative w-full sm:w-64">
-                  <span className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h18M3 12h18M3 19h18" /></svg>
-                  </span>
-                  <select
-                    value={this.state.source}
-                    onChange={this.handleSourceChange}
-                    aria-label="Filter by source"
-                    className="w-full h-10 pl-9 pr-8 border border-blue-200 hover:border-blue-300 focus:border-blue-400 rounded-md bg-white text-gray-800 outline-none focus:ring-2 focus:ring-blue-500 appearance-none shadow-sm"
-                  >
-                    <option value="all">All sources ({sources.length})</option>
-                    <optgroup label="A–M">
-                      {sources
-                        .slice()
-                        .sort((a, b) => a.localeCompare(b))
-                        .filter((s) => (s?.[0] || 'A').toUpperCase() <= 'M')
-                        .map((s) => (
-                          <option key={s} value={s}>{s} ({sourceCounts[s] || 0})</option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="N–Z">
-                      {sources
-                        .slice()
-                        .sort((a, b) => a.localeCompare(b))
-                        .filter((s) => (s?.[0] || 'N').toUpperCase() >= 'N')
-                        .map((s) => (
-                          <option key={s} value={s}>{s} ({sourceCounts[s] || 0})</option>
-                        ))}
-                    </optgroup>
-                  </select>
-                  <span className="pointer-events-none absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                  </span>
-                </div>
-              </div>
-              <div className="mt-4 text-xs text-blue-700">
-                <div className="flex flex-wrap items-center justify-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-100">
-                    <span className="font-medium">Total:</span> {this.state.totalResults.toLocaleString()}
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-100">
-                    <span className="font-medium">Loaded:</span> {this.state.articles.length}
-                  </span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-100">
-                    <span className="font-medium">Sources:</span> {sources.length}
-                  </span>
+                      <option value="all">All sources ({sources.length})</option>
+                      {sources.sort().map((s) => (
+                        <option key={s} value={s}>{s} ({sourceCounts[s] || 0})</option>
+                      ))}
+                    </select>
+                     <span className="pointer-events-none absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400">
+                      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        {/* ================================================================== */}
+        {/* END OF IMPROVED UI SECTION                                      */}
+        {/* ================================================================== */}
+        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {this.state.error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
@@ -403,7 +367,7 @@ export class News extends Component {
           )}
 
           {this.state.loading && this.state.articles.length === 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {Array.from({ length: this.props.pageSize }).map((_, i) => (
                 <SkeletonCard key={`skeleton-${i}`} />
               ))}
@@ -419,7 +383,7 @@ export class News extends Component {
                 <Spinner />
               </div>
             }
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
           >
             {filtered.map((element, index) => (
               <div key={element.url + index} className="h-full">
@@ -432,7 +396,6 @@ export class News extends Component {
                   date={element.publishedAt}
                   source={element.source?.name}
                   category={this.props.category}
-                  // *** ADDED: Pass the current language to NewsItem ***
                   currentLanguage={this.state.language}
                 />
               </div>
