@@ -5,7 +5,7 @@ import SkeletonCard from './SkeletonCard';
 import PropTypes from 'prop-types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getCurrentLanguage, onLanguageChange, t } from '../utils/i18n';
-import apiClient from './apiClient';
+import apiClient from '../apiClient';
 
 // *** FIX: Caches are moved outside the class to persist across component re-mounts ***
 const newsCache = new Map();
