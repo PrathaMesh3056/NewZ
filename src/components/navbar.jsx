@@ -1,8 +1,8 @@
-import React, { Component } from 'react'; 
+import React, {Component} from 'react';
 import { Link } from 'react-router-dom';
 import { t, getCurrentLanguage, getSupportedLanguages } from '../utils/i18n.js';
 
-export default class Navbar extends Component {
+export default class Navbar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -41,7 +41,6 @@ export default class Navbar extends Component {
   }
 
   handleClickOutside = (event) => {
-    // CORRECTED: Fixed typo from 'languageMenuref' to 'languageMenuRef'
     if (this.languageMenuRef.current && !this.languageMenuRef.current.contains(event.target)) {
       this.setState({ isLanguageMenuOpen: false });
     }
@@ -62,22 +61,20 @@ export default class Navbar extends Component {
             </Link>
 
             <div className="hidden md:flex items-center space-x-1">
-              {/* --- NEW: AI Search Link --- */}
               <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 flex items-center gap-1" to="/search">
                 <span className="text-blue-500">✨</span> AI Search
               </Link>
-              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" to="/general">{t('general')}</Link>
-              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" to="/business">{t('business')}</Link>
-              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" to="/technology">{t('technology')}</Link>
-              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" to="/sports">{t('sports')}</Link>
-              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" to="/science">{t('science')}</Link>
-              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2" to="/about">{t('about')}</Link>
+              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/general">{t('general')}</Link>
+              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/business">{t('business')}</Link>
+              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/technology">{t('technology')}</Link>
+              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/sports">{t('sports')}</Link>
+              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/science">{t('science')}</Link>
+              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/about">{t('about')}</Link>
               
               <div className="relative" ref={this.languageMenuRef}>
                 <button 
                   onClick={() => this.setState(prevState => ({ isLanguageMenuOpen: !prevState.isLanguageMenuOpen }))}
-                  className="flex items-center text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
-                  aria-label={t('language')}
+                  className="flex items-center text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                   aria-haspopup="true"
                   aria-expanded={isLanguageMenuOpen}
                 >
@@ -110,7 +107,7 @@ export default class Navbar extends Component {
             <div className="md:hidden ml-2">
               <button 
                 onClick={this.toggleMobileMenu}
-                className="text-gray-700 dark:text-gray-300 hover:text-red-600 p-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+                className="text-gray-700 dark:text-gray-300 hover:text-red-600 p-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 aria-label="Toggle menu"
                 aria-expanded={isMobileMenuOpen}
               >
@@ -128,18 +125,26 @@ export default class Navbar extends Component {
           </div>
 
           {isMobileMenuOpen && (
-            <div className="md:hidden pb-4">
+            <div className="md:hidden p-4">
               <div className="flex flex-col space-y-2">
-                {/* --- NEW: AI Search Link for Mobile --- */}
-                <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-base font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 flex items-center gap-2" to="/search" onClick={this.closeMobileMenu}>
-                  <span className="text-blue-500">✨</span> AI Search
+                
+                {/* ================================================================== */}
+                {/* THIS IS THE NEW LINK ADDED FOR THE MOBILE MENU                  */}
+                {/* ================================================================== */}
+                <Link 
+                  className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-3 text-base font-semibold transition-colors duration-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 flex items-center gap-3" 
+                  to="/search" 
+                  onClick={this.closeMobileMenu}
+                >
+                  <span className="text-blue-500">🧠</span> AI Search
                 </Link>
-                <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-base font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" to="/general" onClick={this.closeMobileMenu}>{t('general')}</Link>
-                <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-base font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" to="/business" onClick={this.closeMobileMenu}>{t('business')}</Link>
-                <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-base font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" to="/technology" onClick={this.closeMobileMenu}>{t('technology')}</Link>
-                <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-base font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" to="/sports" onClick={this.closeMobileMenu}>{t('sports')}</Link>
-                <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-base font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" to="/science" onClick={this.closeMobileMenu}>{t('science')}</Link>
-                <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-base font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500" to="/about" onClick={this.closeMobileMenu}>{t('about')}</Link>
+
+                <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/general" onClick={this.closeMobileMenu}>{t('general')}</Link>
+                <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/business" onClick={this.closeMobileMenu}>{t('business')}</Link>
+                <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/technology" onClick={this.closeMobileMenu}>{t('technology')}</Link>
+                <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/sports" onClick={this.closeMobileMenu}>{t('sports')}</Link>
+                <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/science" onClick={this.closeMobileMenu}>{t('science')}</Link>
+                <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/about" onClick={this.closeMobileMenu}>{t('about')}</Link>
                 
                 <div className="px-3 pt-4 pb-2">
                   <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{t('language')}</p>
@@ -148,7 +153,7 @@ export default class Navbar extends Component {
                       <button
                         key={lang.code}
                         onClick={() => this.handleLanguageChange(lang.code)}
-                        className={`px-3 py-1 text-sm rounded transition-colors duration-150 ${
+                        className={`px-3 py-1 text-sm rounded-md transition-colors duration-150 ${
                           currentLanguage === lang.code
                             ? 'bg-red-600 text-white shadow'
                             : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -167,4 +172,3 @@ export default class Navbar extends Component {
     );
   }
 }
-
