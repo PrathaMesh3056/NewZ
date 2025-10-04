@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { toast } from './Toaster';
+import apiClient from '../apiClient'; // Adjust path if needed
 
 const SearchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -16,7 +17,7 @@ const LoadingSpinner = () => (
 
 const UpdateIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block mr-1">
-        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" />
     </svg>
 );
 
@@ -53,19 +54,11 @@ const AiSearch = () => {
         controllerRef.current = controller;
 
         try {
-            const response = await fetch('/api/rag-search', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ query }),
+            const response = await apiClient.post('/rag-search', { query }, {
                 signal: controller.signal,
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'The search failed. Please try again.');
-            }
-
-            const data = await response.json();
+            const data = response.data; // Get data directly from response.data
             setResult(data);
 
         } catch (err) {
@@ -82,10 +75,9 @@ const AiSearch = () => {
     const handleIndexTrigger = async () => {
         toast("Indexing started. This may take a minute. Please wait before searching.");
         try {
-            const response = await fetch('/api/trigger-indexing', { method: 'POST' });
-            if (!response.ok) throw new Error("Failed to start indexing.");
-            const data = await response.json();
-            
+            const response = await apiClient.post('/trigger-indexing');
+            const data = response.data; // Get data directly from response.data
+
         } catch (err) {
             toast.error(err.message);
         }
@@ -101,7 +93,7 @@ const AiSearch = () => {
                     <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
                         Ask a question and get answers based on the latest news articles.
                     </p>
-                    <button 
+                    <button
                         onClick={handleIndexTrigger}
                         className="mt-6 text-xs text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-300"
                     >
@@ -126,7 +118,7 @@ const AiSearch = () => {
                         {isLoading ? <LoadingSpinner /> : <SearchIcon />}
                     </button>
                 </form>
-                
+
                 <div className="space-y-8">
                     {error && (
                         <div className="p-4 text-center text-red-800 dark:text-red-200 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700/60 rounded-xl">

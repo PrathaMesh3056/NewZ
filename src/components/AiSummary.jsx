@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { toast } from "./Toaster";
 import { getCurrentLanguage, getSupportedLanguages } from "../utils/i18n";
+import apiClient from '../apiClient'; // Adjust path if needed
 
 const IconPlay = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>;
 const IconStop = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>;
@@ -271,17 +272,14 @@ const AiSummary = () => {
         return;
       }
       setIsAudioLoading(true);
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title,
-          summary: summary.event || "No summary available",
-          language: selectedLanguage,
-        }),
+      const res = await apiClient.post("/tts", {
+        title,
+        summary: summary.event || "No summary available",
+        language: selectedLanguage,
+      }, {
+        responseType: 'blob', // Important: Tells the client to expect a file
       });
-      if (!res.ok) throw new Error("TTS failed");
-      const audioBlob = await res.blob();
+      const audioBlob = res.data; // The audio file is directly in res.data
       const audioUrl = URL.createObjectURL(audioBlob);
       const audio = new Audio(audioUrl);
       audioRef.current = audio;
@@ -311,66 +309,66 @@ const AiSummary = () => {
 
   // <--- MODIFIED: This function now has improved error handling --->
   const generateSummary = async (language) => {
-    if (!description) return;
+  if (!description) return;
 
-    const cacheKey = `${description.substring(0, 100)}-${language}`;
-    if (summaryCache.has(cacheKey)) {
-      const cached = summaryCache.get(cacheKey);
-      setSummary(cached.summary);
-      setInsights(cached.insights);
-      return;
+  const cacheKey = `${description.substring(0, 100)}-${language}`;
+  if (summaryCache.has(cacheKey)) {
+    const cached = summaryCache.get(cacheKey);
+    setSummary(cached.summary);
+    setInsights(cached.insights);
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+
+  if (controllerRef.current) controllerRef.current.abort();
+  const controller = new AbortController();
+  controllerRef.current = controller;
+
+  try {
+    const res = await apiClient.post("/api/summary", {
+      text: description,
+      language: language
+    }, {
+      signal: controller.signal
+    });
+
+    // This is the only line you need to get the data from apiClient
+    const data = res.data;
+
+    const summaryData = {
+      event: data?.summary?.trim() || "No summary available",
+      background: data?.background?.trim() || "",
+    };
+    const insightsData = {
+      sentiment: data?.sentiment || "Neutral", readTime: data?.readTime || "30s",
+      context: data?.context || "General news", relevance: data?.relevance || "General interest",
+      bias: data?.bias || "Balanced", next: data?.next || "Watch for follow-ups",
+      wordCount: data?.wordCount || (summaryData.event ? summaryData.event.split(/\s+/).length : 0)
+    };
+
+    summaryCache.set(cacheKey, { summary: summaryData, insights: insightsData });
+    setSummary(summaryData);
+    setInsights(insightsData);
+    setModel(data?.model || null);
+    setConfidence(data?.confidence || null);
+
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error("Error generating summary:", err);
+      // The apiClient's interceptor already shows a toast message for the user
+      setError(err.message); 
     }
-
-    setLoading(true);
-    setError(null);
-
-    if (controllerRef.current) controllerRef.current.abort();
-    const controller = new AbortController();
-    controllerRef.current = controller;
-
-    try {
-      const res = await fetch("/api/summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: description, language: language }),
-        signal: controller.signal,
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.detail || `Failed to generate summary (Status: ${res.status})`);
-      }
-
-      const data = await res.json();
-      const summaryData = {
-        event: data?.summary?.trim() || "No summary available",
-        background: data?.background?.trim() || "",
-      };
-      const insightsData = {
-        sentiment: data?.sentiment || "Neutral", readTime: data?.readTime || "30s",
-        context: data?.context || "General news", relevance: data?.relevance || "General interest",
-        bias: data?.bias || "Balanced", next: data?.next || "Watch for follow-ups",
-        wordCount: data?.wordCount || (summaryData.event ? summaryData.event.split(/\s+/).length : 0)
-      };
-
-      summaryCache.set(cacheKey, { summary: summaryData, insights: insightsData });
-      setSummary(summaryData);
-      setInsights(insightsData);
-      setModel(data?.model || null);
-      setConfidence(data?.confidence || null);
-    } catch (err) {
-      if (err.name !== 'AbortError') {
-        console.error("Error generating summary:", err);
-        setError(err.message);
-        toast.error("Failed to generate summary.");
-      }
-    } finally {
-      if (controllerRef.current === controller) {
-        setLoading(false);
-        controllerRef.current = null;
-      }
+  } finally {
+    if (controllerRef.current === controller) {
+      setLoading(false);
+      controllerRef.current = null;
     }
-  };
+  }
+};
+    
+  
 
   const handleLanguageSelect = (languageCode) => {
     setSelectedLanguage(languageCode);
@@ -423,10 +421,10 @@ const AiSummary = () => {
   const sendFeedback = async (useful) => {
     if (feedbackSent) return;
     try {
-      await fetch('/api/feedback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, url: newsUrl, useful: !!useful })
+      await apiClient.post('/api/feedback', {
+        title,
+        url: newsUrl,
+        useful: !!useful
       });
       setFeedbackSent(true);
       toast.success(useful ? 'Thanks for your feedback! 👍' : 'Thanks for your feedback! 👎');
@@ -465,31 +463,31 @@ const AiSummary = () => {
             ) : (
               <>
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 flex items-center gap-2">
-                        <span className="text-blue-600">✨</span>
-                        <span>AI Summary</span>
-                        {model && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20">{model}</span>}
-                      </h2>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">
-                        AI-generated summary. May contain inaccuracies. Please verify important information.
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <SummaryActions
-                        onPlay={handlePlay}
-                        onCopy={handleCopy}
-                        isPlaying={isPlaying}
-                        isAudioLoading={isAudioLoading}
-                        copied={copied}
-                        summary={summary}
-                        newsUrl={newsUrl}
-                      />
-                      <LanguageDropdown
-                        currentLanguage={selectedLanguage}
-                        onSelect={handleLanguageSelect}
-                      />
-                    </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-50 flex items-center gap-2">
+                      <span className="text-blue-600">✨</span>
+                      <span>AI Summary</span>
+                      {model && <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-300 dark:border-blue-500/20">{model}</span>}
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">
+                      AI-generated summary. May contain inaccuracies. Please verify important information.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <SummaryActions
+                      onPlay={handlePlay}
+                      onCopy={handleCopy}
+                      isPlaying={isPlaying}
+                      isAudioLoading={isAudioLoading}
+                      copied={copied}
+                      summary={summary}
+                      newsUrl={newsUrl}
+                    />
+                    <LanguageDropdown
+                      currentLanguage={selectedLanguage}
+                      onSelect={handleLanguageSelect}
+                    />
+                  </div>
                 </div>
 
                 {error && <ErrorState error={error} onRetry={() => generateSummary(selectedLanguage)} />}

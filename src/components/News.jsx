@@ -5,6 +5,7 @@ import SkeletonCard from './SkeletonCard';
 import PropTypes from 'prop-types';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getCurrentLanguage, onLanguageChange, t } from '../utils/i18n';
+import apiClient from './apiClient';
 
 // *** FIX: Caches are moved outside the class to persist across component re-mounts ***
 const newsCache = new Map();
@@ -81,17 +82,17 @@ export class News extends Component {
     }
 
     try {
-      const response = await fetch('/api/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texts: textsToTranslate, targetLang }),
+      const response = await apiClient.post('/translate', {
+        texts: textsToTranslate,
+        targetLang
       });
+      const { translations } = response.data; // Note: axios puts data in a .data object
 
       if (!response.ok) {
         throw new Error('Translation service failed');
       }
 
-      const { translations } = await response.json();
+      
 
       const newTranslatedArticles = articlesToTranslate.map((article, index) => ({
         ...article,
@@ -145,14 +146,14 @@ export class News extends Component {
       ...(source !== 'all' && { sources: source })
     });
 
-    const url = `${baseUrl}/news?${params.toString()}`;
-
     this.setState({ loading: true, error: null });
 
     try {
-      const res = await fetch(url, { signal: this.controller.signal });
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const data = await res.json();
+      const res = await apiClient.get('/news', {
+        params: params, // Pass the URLSearchParams object directly
+        signal: this.controller.signal
+      });
+      const data = res.data; // Get the data directly from res.data
       if (this.controller.signal.aborted) return;
 
       if (!data.articles || data.articles.length === 0) {
