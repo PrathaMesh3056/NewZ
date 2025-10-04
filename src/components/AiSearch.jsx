@@ -54,7 +54,7 @@ const AiSearch = () => {
         controllerRef.current = controller;
 
         try {
-            const response = await apiClient.post('/rag-search', { query }, {
+            const response = await apiClient.post('/api/rag-search', { query }, {
                 signal: controller.signal,
             });
 
@@ -75,7 +75,7 @@ const AiSearch = () => {
     const handleIndexTrigger = async () => {
         toast("Indexing started. This may take a minute. Please wait before searching.");
         try {
-            const response = await apiClient.post('/trigger-indexing');
+            const response = await apiClient.post('/api/trigger-indexing');
             const data = response.data; // Get data directly from response.data
 
         } catch (err) {

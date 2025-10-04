@@ -82,7 +82,7 @@ export class News extends Component {
     }
 
     try {
-      const response = await apiClient.post('/translate', {
+      const response = await apiClient.post('/api/translate', {
         texts: textsToTranslate,
         targetLang
       });
@@ -149,7 +149,7 @@ export class News extends Component {
     this.setState({ loading: true, error: null });
 
     try {
-      const res = await apiClient.get('/news', {
+      const res = await apiClient.get('/api/news', {
         params: params, // Pass the URLSearchParams object directly
         signal: this.controller.signal
       });

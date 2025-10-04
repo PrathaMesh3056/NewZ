@@ -272,7 +272,7 @@ const AiSummary = () => {
         return;
       }
       setIsAudioLoading(true);
-      const res = await apiClient.post("/tts", {
+      const res = await apiClient.post("/api/tts", {
         title,
         summary: summary.event || "No summary available",
         language: selectedLanguage,
