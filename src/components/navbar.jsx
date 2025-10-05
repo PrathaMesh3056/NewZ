@@ -61,9 +61,7 @@ export default class Navbar extends React.Component {
             </Link>
 
             <div className="hidden md:flex items-center space-x-1">
-              <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 flex items-center gap-1" to="/search">
-                <span className="text-blue-500">✨</span> AI Search
-              </Link>
+             
               <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/general">{t('general')}</Link>
               <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/business">{t('business')}</Link>
               <Link className="text-gray-700 dark:text-gray-300 hover:text-red-600 px-3 py-2 text-sm font-medium transition-colors duration-200 rounded" to="/technology">{t('technology')}</Link>
