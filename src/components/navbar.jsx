@@ -128,17 +128,6 @@ export default class Navbar extends React.Component {
             <div className="md:hidden p-4">
               <div className="flex flex-col space-y-2">
                 
-                {/* ================================================================== */}
-                {/* THIS IS THE NEW LINK ADDED FOR THE MOBILE MENU                  */}
-                {/* ================================================================== */}
-                <Link 
-                  className="bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 px-4 py-3 text-base font-semibold transition-colors duration-200 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 flex items-center gap-3" 
-                  to="/search" 
-                  onClick={this.closeMobileMenu}
-                >
-                  <span className="text-blue-500">🧠</span> AI Search
-                </Link>
-
                 <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/general" onClick={this.closeMobileMenu}>{t('general')}</Link>
                 <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/business" onClick={this.closeMobileMenu}>{t('business')}</Link>
                 <Link className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 px-4 py-3 text-base font-medium transition-colors duration-200 rounded-lg" to="/technology" onClick={this.closeMobileMenu}>{t('technology')}</Link>
