@@ -1,6 +1,10 @@
 # Use a specific slim Python version for reproducibility
 FROM python:3.11-slim
 
+# NEW - Install system dependencies required to build Python packages
+
+RUN apt-get update && apt-get install -y build-essential python3-dev
+
 # Set the working directory
 WORKDIR /app
 
@@ -24,3 +28,4 @@ ENV PATH="/home/appuser/.local/bin:$PATH"
 
 # Command to run the application
 CMD ["uvicorn", "Main:app", "--host", "0.0.0.0", "--port", "10000"]
+
