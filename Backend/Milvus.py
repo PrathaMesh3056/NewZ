@@ -18,10 +18,23 @@ embedding_dimension = 384
 @lru_cache(maxsize=1)
 def get_embedding_model():
     """Loads and returns the sentence-transformer model."""
-    logger.info("Loading sentence-transformer model 'all-MiniLM-L6-v2'...")
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    logger.info("Embedding model loaded successfully.")
-    return model
+    try:
+        logger.info("Loading sentence-transformer model 'all-MiniLM-L6-v2'...")
+
+        # ✅ Force proper model loading on CPU
+        model = SentenceTransformer('all-MiniLM-L6-v2', device='cpu')
+
+        # ✅ Ensure weights are actually materialized (no meta tensors)
+        if any(p.device.type == 'meta' for p in model.parameters()):
+            logger.warning("Model initialized on meta device. Forcing to CPU with .to_empty().")
+            model = model.to_empty(device='cpu')
+
+        logger.info("Embedding model loaded successfully.")
+        return model
+
+    except Exception as e:
+        logger.error(f"Failed to load embedding model: {e}")
+        raise
 
 # --- MODIFIED: This function now connects to Zilliz Cloud ---
 def get_milvus_connection():
