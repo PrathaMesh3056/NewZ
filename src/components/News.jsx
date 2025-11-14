@@ -306,9 +306,7 @@ export class News extends Component {
                     </span>
                   </div>
                   
-                  {/* ================================================================== */}
-                  {/* THIS IS THE NEW AI SEARCH BUTTON ADDED TO THE HOMEPAGE          */}
-                  {/* ================================================================== */}
+                   
                   <Link 
                     to="/search" 
                     className="group w-full flex items-center justify-center gap-3 h-12 px-6 bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-red-500/40 focus:ring-4 focus:ring-red-500/50 focus:outline-none transition-all duration-300 transform hover:-translate-y-1"
